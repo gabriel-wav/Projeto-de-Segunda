@@ -1,6 +1,8 @@
 export class Aluno {
-    id: number;
-    nome: string;
-    matricula: string;
-    curso: string;
+  id: number;
+  nome: string;
+  email: string;
+  curso: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

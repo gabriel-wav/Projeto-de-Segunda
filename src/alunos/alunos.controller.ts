@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Header } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Header,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { AlunosService } from './alunos.service.js';
 import { CreateAlunoDto } from './dto/create-aluno.dto.js';
 import { UpdateAlunoDto } from './dto/update-aluno.dto.js';
@@ -8,24 +19,30 @@ export class AlunosController {
   constructor(private readonly alunosService: AlunosService) {}
 
   @Post()
-  create(@Body() createAlunoDto: CreateAlunoDto) {
-    return this.alunosService.create(createAlunoDto);
+  @HttpCode(HttpStatus.CREATED) // 201 Created
+  async create(@Body() createAlunoDto: CreateAlunoDto) {
+    return await this.alunosService.create(createAlunoDto);
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK) // 200 OK
   @Header('Content-Type', 'text/html')
-  findAll() {
-    const listaAlunos = this.alunosService.findAll();
-    
+  async findAll() {
+    const listaAlunos = await this.alunosService.findAll();
+
     // Transforma a lista de alunos em linhas de tabela HTML com mais espaço (padding)
-    const linhasTabela = listaAlunos.map(aluno => `
+    const linhasTabela = listaAlunos
+      .map(
+        (aluno) => `
       <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors" style="border-bottom: 1px solid #f1f5f9;">
         <td class="px-6 py-4 text-center font-medium text-slate-900" style="padding: 16px 24px; text-align: center; color: #0f172a;">${aluno.id}</td>
         <td class="px-6 py-4 text-center text-slate-700" style="padding: 16px 24px; text-align: center; color: #334155;">${aluno.nome}</td>
-        <td class="px-6 py-4 text-center text-slate-600 font-mono text-sm" style="padding: 16px 24px; text-align: center; color: #475569; font-family: monospace;">${aluno.matricula}</td>
+        <td class="px-6 py-4 text-center text-slate-600 font-mono text-sm" style="padding: 16px 24px; text-align: center; color: #475569; font-family: monospace;">${aluno.email}</td>
         <td class="px-6 py-4 text-center text-slate-600" style="padding: 16px 24px; text-align: center; color: #475569;">${aluno.curso}</td>
       </tr>
-    `).join('');
+    `,
+      )
+      .join('');
 
     // Retorna uma página HTML com elementos perfeitamente centralizados e espaçados
     return `
@@ -65,12 +82,14 @@ export class AlunosController {
                 <tr>
                   <th class="w-16 px-6 py-4 text-center font-semibold tracking-wider" style="width: 64px; padding: 16px 24px; text-align: center; color: #334155;">ID</th>
                   <th class="px-6 py-4 text-center font-semibold tracking-wider" style="padding: 16px 24px; text-align: center; color: #334155;">Nome</th>
-                  <th class="px-6 py-4 text-center font-semibold tracking-wider" style="padding: 16px 24px; text-align: center; color: #334155;">Matrícula</th>
+                  <th class="px-6 py-4 text-center font-semibold tracking-wider" style="padding: 16px 24px; text-align: center; color: #334155;">E-mail</th>
                   <th class="px-6 py-4 text-center font-semibold tracking-wider" style="padding: 16px 24px; text-align: center; color: #334155;">Curso</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                ${linhasTabela || `
+                ${
+                  linhasTabela ||
+                  `
                   <tr>
                     <td colspan="4" class="px-6 py-12 text-center text-slate-400 bg-slate-50/30" style="padding: 48px 24px; text-align: center; color: #94a3b8;">
                       <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
@@ -80,7 +99,8 @@ export class AlunosController {
                       </div>
                     </td>
                   </tr>
-                `}
+                `
+                }
               </tbody>
             </table>
           </div>
@@ -91,21 +111,21 @@ export class AlunosController {
     `;
   }
 
-
-
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.alunosService.findOne(+id); // O '+' converte de texto para número
+  @HttpCode(HttpStatus.OK) // 200 OK
+  async findOne(@Param('id') id: string) {
+    return await this.alunosService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlunoDto: UpdateAlunoDto) {
-    return this.alunosService.update(+id, updateAlunoDto); // O '+' converte de texto para número
+  @HttpCode(HttpStatus.OK) // 200 OK
+  async update(@Param('id') id: string, @Body() updateAlunoDto: UpdateAlunoDto) {
+    return await this.alunosService.update(+id, updateAlunoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.alunosService.remove(+id); // O '+' converte de texto para número
+  @HttpCode(HttpStatus.NO_CONTENT) // 204 No Content
+  async remove(@Param('id') id: string) {
+    await this.alunosService.remove(+id);
   }
 }
